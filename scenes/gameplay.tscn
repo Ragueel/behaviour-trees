@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://bnbk38hqrdtxh"]
+
+[ext_resource type="Material" uid="uid://gldnji3m0edj" path="res://materials/ground_material.tres" id="1_1wky2"]
+[ext_resource type="Material" uid="uid://dcy0x5j5x5h5m" path="res://materials/target.tres" id="2_j5b2b"]
+[ext_resource type="Script" path="res://scripts/target.gd" id="3_0oijv"]
+[ext_resource type="PackedScene" uid="uid://ceppkiq6gc2dk" path="res://characters/enemy.tscn" id="3_rfoho"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_0awce"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_wwsev"]
+
+[sub_resource type="Environment" id="Environment_xoaak"]
+background_mode = 1
+background_color = Color(0.402498, 0.438012, 0.495325, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.553731, 0.775318, 0.923381, 1)
+tonemap_mode = 3
+tonemap_exposure = 0.5
+ssao_enabled = true
+fog_enabled = true
+fog_density = 0.02
+
+[node name="GameplayScene" type="Node3D"]
+
+[node name="plane" type="MeshInstance3D" parent="."]
+transform = Transform3D(150.809, 0, 0, 0, 1, 0, 0, 0, 150.809, 0, 0, 0)
+material_override = ExtResource("1_1wky2")
+mesh = SubResource("PlaneMesh_0awce")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.824591, -0.39718, 0.402863, 8.46695e-09, 0.712112, 0.702066, -0.56573, -0.578917, 0.587201, 0, 0, 0)
+shadow_enabled = true
+
+[node name="target" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1.33068, 0, 0, 0, 1, 0, 0.665468, 0)
+material_override = ExtResource("2_j5b2b")
+mesh = SubResource("BoxMesh_wwsev")
+script = ExtResource("3_0oijv")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_xoaak")
+
+[node name="Enemy" parent="." instance=ExtResource("3_rfoho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.60031, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.955222, 0.295891, 0, -0.295891, 0.955222, -2.68634, 3.26666, 10.5354)

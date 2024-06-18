@@ -1,0 +1,77 @@
+[gd_scene load_steps=14 format=3 uid="uid://ceppkiq6gc2dk"]
+
+[ext_resource type="Material" uid="uid://b8qs1hwb8yvnx" path="res://materials/enemy.tres" id="1_ba6ld"]
+[ext_resource type="Script" path="res://scripts/btree/behaviour_tree.gd" id="1_d28fr"]
+[ext_resource type="Script" path="res://scripts/btree/repeater_node.gd" id="2_5m0u0"]
+[ext_resource type="Script" path="res://scripts/btree/sequence_node.gd" id="3_t16kq"]
+[ext_resource type="Script" path="res://scripts/btree/actions/find_target.gd" id="4_vtweb"]
+[ext_resource type="Script" path="res://scripts/btree/actions/move_to_target.gd" id="5_0kavr"]
+[ext_resource type="Script" path="res://scripts/btree/actions/attack_target.gd" id="7_1eo1x"]
+[ext_resource type="Script" path="res://scripts/btree/selector_node.gd" id="8_s4ykw"]
+[ext_resource type="Script" path="res://scripts/btree/decorators/negator.gd" id="9_hnqoa"]
+[ext_resource type="Script" path="res://scripts/btree/decorators/repeat_until_fail.gd" id="10_axmco"]
+[ext_resource type="Script" path="res://scripts/btree/actions/patrol.gd" id="11_oum54"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_j4xpj"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_6w8c0"]
+
+[node name="Enemy" type="CharacterBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_j4xpj")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = ExtResource("1_ba6ld")
+mesh = SubResource("CapsuleMesh_6w8c0")
+
+[node name="BehaviourTree" type="Node" parent="." node_paths=PackedStringArray("root")]
+script = ExtResource("1_d28fr")
+root = NodePath("RepeaterNode")
+
+[node name="RepeaterNode" type="Node" parent="BehaviourTree" node_paths=PackedStringArray("node")]
+script = ExtResource("2_5m0u0")
+node = NodePath("SelectorNode")
+
+[node name="SelectorNode" type="Node" parent="BehaviourTree/RepeaterNode" node_paths=PackedStringArray("nodes")]
+script = ExtResource("8_s4ykw")
+nodes = [NodePath("AttackTarget"), NodePath("RepeatUntilFail")]
+
+[node name="AttackTarget" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode" node_paths=PackedStringArray("nodes")]
+script = ExtResource("3_t16kq")
+nodes = [NodePath("FindTarget"), NodePath("MoveToTarget"), NodePath("AttackTarget")]
+
+[node name="FindTarget" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode/AttackTarget"]
+script = ExtResource("4_vtweb")
+
+[node name="MoveToTarget" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode/AttackTarget" node_paths=PackedStringArray("move_node")]
+script = ExtResource("5_0kavr")
+move_node = NodePath("../../../../..")
+move_speed = 3.0
+
+[node name="AttackTarget" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode/AttackTarget" node_paths=PackedStringArray("author")]
+script = ExtResource("7_1eo1x")
+author = NodePath("../../../../..")
+
+[node name="RepeatUntilFail" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode" node_paths=PackedStringArray("child_node")]
+script = ExtResource("10_axmco")
+child_node = NodePath("PatrolSequence")
+
+[node name="PatrolSequence" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode/RepeatUntilFail" node_paths=PackedStringArray("nodes")]
+script = ExtResource("3_t16kq")
+nodes = [NodePath("Negator"), NodePath("Patrol")]
+
+[node name="Negator" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode/RepeatUntilFail/PatrolSequence" node_paths=PackedStringArray("child_node")]
+script = ExtResource("9_hnqoa")
+child_node = NodePath("FindTarget")
+
+[node name="FindTarget" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode/RepeatUntilFail/PatrolSequence/Negator"]
+script = ExtResource("4_vtweb")
+
+[node name="Patrol" type="Node" parent="BehaviourTree/RepeaterNode/SelectorNode/RepeatUntilFail/PatrolSequence" node_paths=PackedStringArray("move_node")]
+script = ExtResource("11_oum54")
+move_node = NodePath("../../../../../..")
+patrol_duration = 1.0
+movement_speed = 1.5
